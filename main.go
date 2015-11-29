@@ -2,15 +2,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"encoding/json"
 )
 
 type Book struct {
-	Title string
-	ISBN string
-	Library string
+	Title    string
+	ISBN     string
+	Library  string
 	ReqCount uint
 }
 
@@ -21,7 +21,7 @@ func loadBooks() (*[]Book, error) {
 		return nil, err
 	}
 	var books []Book
-	if err := json.Unmarshal(data,&books); err != nil {
+	if err := json.Unmarshal(data, &books); err != nil {
 		return nil, fmt.Errorf("JSON unmarshling failed: %s", err)
 	}
 	return &books, nil
