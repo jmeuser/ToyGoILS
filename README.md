@@ -24,3 +24,12 @@ then navigate to http//localhost:8080/ and you should see:
  <td>0</td>
 </tr>
 </table>
+
+To Do:
+* Introduce edit book
+* Introduce view catalogue
+* Introduce search for book
+* Introduce search for book in catalogue
+* Introduce homepage
+* Eliminate possible race conditions using "synch" package and synch.Mutex or related tool.
+* More to Come
