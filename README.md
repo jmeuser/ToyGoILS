@@ -3,9 +3,36 @@ A toy ILS written in Go.
 
 $ go run main.go
 
-then navigate to http//localhost:8080/ and you should see:
+then navigate to http://localhost:8080/view?c=UniCat and you should see:
 
 
+
+<h1>UniCat</h1>
+
+
+<div>
+<table>
+<tr>
+ <th scope="row">Title</th>
+ <td>Authority and the Individual</td>
+</tr>
+<tr>
+ <th scope="row">ISBN</th>
+ <td>9781134812271</td>
+</tr>
+<tr>
+ <th scope="row">Library</th>
+ <td>Pembrook Public Library</td>
+</tr>
+<tr>
+ <th scope="row">Requests</th>
+ <td>0</td>
+</tr>
+</table>
+
+</div>
+
+<div>
 <table>
 <tr>
  <th scope="row">Title</th>
@@ -24,6 +51,10 @@ then navigate to http//localhost:8080/ and you should see:
  <td>0</td>
 </tr>
 </table>
+
+</div>
+
+
 
 To Do:
 * Introduce edit book
