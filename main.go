@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 )
 
 type Book struct {
@@ -47,25 +48,56 @@ func loadCatalogue(name string) (*Catalogue, error) {
 }
 
 // templates cache
-var templates = template.Must(template.ParseFiles("./tmpl/book/view.html"))
+var templates = template.Must(template.ParseFiles("./tmpl/editBook.html", "./tmpl/viewBook.html", "./tmpl/viewCatalogue.html"))
 
 func renderBookTemplate(w http.ResponseWriter, tmpl string, b *Book) {
-	path := tmpl + ".html"
-	err := templates.ExecuteTemplate(w, path, b)
+	err := templates.ExecuteTemplate(w, tmpl + ".html", b)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func viewBookHandler(w http.ResponseWriter, r *http.Request, b *Book) {
-	renderBookTemplate(w, "view", b) // place holder
+	renderBookTemplate(w, "viewBook", b) // place holder
 }
 
 func makeBookHandler(fn func(http.ResponseWriter, *http.Request, *Book)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// get book from catalogue from url
+		// or return findBook (or refactor into find)
 		fn(w, r, UniCat.Books[1]) // place holder
 	}
 }
+
+func renderCatalogueTemplate(w http.ResponseWriter, tmpl string, c *Catalogue) {
+	err := templates.ExecuteTemplate(w, tmpl + ".html", c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func viewCatalogueHandler(w http.ResponseWriter, r *http.Request, name string) {
+	c, err := loadCatalogue(name)
+	if err != nil {
+		http.NotFound(w, r) // place holder: redirect to "makeCatalogue"?
+		return
+	}
+	renderCatalogueTemplate(w, "viewCatalogue", c)
+}
+
+var validCataloguePath = regexp.MustCompile("^/view/catalogue/([a-zA-Z]+)$")
+
+func makeCatalogueHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		m := validCataloguePath.FindStringSubmatch(r.URL.Path)
+		if m == nil {
+			http.NotFound(w,r)
+			return
+		}
+		fn(w, r, m[1])
+	}
+}
+
 
 var UniCat Catalogue
 
@@ -76,7 +108,8 @@ func main() {
 	UniCat = Catalogue{Name: "UniCat"}
 	UniCat.Books = books
 	UniCat.save()
-	http.HandleFunc("/", makeBookHandler(viewBookHandler))
+	http.HandleFunc("/view/book/", makeBookHandler(viewBookHandler))
+	http.HandleFunc("/view/catalogue/", makeCatalogueHandler(viewCatalogueHandler))
 
 	http.ListenAndServe(":8080", nil)
 }

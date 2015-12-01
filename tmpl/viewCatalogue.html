@@ -1,0 +1,7 @@
+<h1>{{.Name}}</h1>
+
+{{range $i, $x := .Books}}
+<div>
+{{template "viewBook.html" $x}}
+</div>
+{{end}}
