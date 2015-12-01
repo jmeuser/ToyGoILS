@@ -25,7 +25,7 @@ type Catalogue struct {
 
 // save marshals .Books then writes to .Name + ".json"
 func (c *Catalogue) save() error {
-	data, err := json.Marshal(c.Books)
+	data, err := json.MarshalIndent(c.Books, "", "	")
 	if err != nil {
 		return fmt.Errorf("JSON marshing failed: %s", err)
 	}
