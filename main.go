@@ -85,16 +85,25 @@ func viewCatalogueHandler(w http.ResponseWriter, r *http.Request, name string) {
 	renderCatalogueTemplate(w, "viewCatalogue", c)
 }
 
-var validCataloguePath = regexp.MustCompile("^/view/catalogue/([a-zA-Z]+)$")
+func viewHandler(w http.ResponseWriter, r *http.Request, url string) {
+	v := r.URL.Query()
+	b := v.Get("b") // get book query parameters
+	c := v.Get("c") // get catalogue query parameters
+	if b == "" && c != "" {
+		viewCatalogueHandler(w, r, c)
+	}
+}
 
-func makeCatalogueHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+var validPath = regexp.MustCompile("^/view?.*$") // placeholder
+
+func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		m := validCataloguePath.FindStringSubmatch(r.URL.Path)
+		m := validPath.FindStringSubmatch(r.URL.Path)
 		if m == nil {
 			http.NotFound(w,r)
 			return
 		}
-		fn(w, r, m[1])
+		fn(w, r, m[0]) // placeholder: send whole url onward
 	}
 }
 
@@ -108,8 +117,7 @@ func main() {
 	UniCat = Catalogue{Name: "UniCat"}
 	UniCat.Books = books
 	UniCat.save()
-	http.HandleFunc("/view/book/", makeBookHandler(viewBookHandler))
-	http.HandleFunc("/view/catalogue/", makeCatalogueHandler(viewCatalogueHandler))
+	http.HandleFunc("/view", makeHandler(viewHandler))
 
 	http.ListenAndServe(":8080", nil)
 }
