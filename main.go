@@ -132,8 +132,6 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	renderCatalogueTemplate(w, "viewCatalogue", c)
 }
 
-
-
 var validPath = regexp.MustCompile("^/view?.*$") // placeholder
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
