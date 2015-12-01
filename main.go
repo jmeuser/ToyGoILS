@@ -29,13 +29,13 @@ func (c *Catalogue) save() error {
 	if err != nil {
 		return fmt.Errorf("JSON marshing failed: %s", err)
 	}
-	filename := c.Name + ".json"
+	filename := "./cats/" + c.Name + ".json"
 	return ioutil.WriteFile(filename, data, 0600)
 }
 
 // loadCatalogue unmarshals data read from name.json into a Catalogue
 func loadCatalogue(name string) (*Catalogue, error) {
-	filename := name + ".json"
+	filename := "./cats/" + name + ".json"
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
