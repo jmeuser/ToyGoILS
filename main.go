@@ -122,17 +122,13 @@ func findHandler(w http.ResponseWriter, r *http.Request) {
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	isbn := r.FormValue("isbn")
-	fmt.Println("\""+title+"\"", "\""+isbn+"\"")
 	c := &UniCat // placeholder
-	fmt.Println(*c)
 	if title != "" {
-		fmt.Println(c.Titles[title])
 		c = makeCatalogue("Results", c.Titles[title])
 	}
 	if isbn != "" {
 		c = makeCatalogue("Results", c.ISBNs[isbn])
 	}
-	fmt.Println(*c)
 	renderCatalogueTemplate(w, "viewCatalogue", c)
 }
 
