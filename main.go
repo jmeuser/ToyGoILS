@@ -27,6 +27,14 @@ type Catalogue struct {
 	Libs   map[string][]*Book
 }
 
+func (c *Catalogue) intrBook(b *Book) {
+	c.Count++
+	c.Books = append(c.Books, b)
+	c.Titles[b.Title] = append(c.Titles[b.Title], b)
+	c.ISBNs[b.ISBN] = append(c.ISBNs[b.ISBN], b)
+	c.Libs[b.Lib] = append(c.Libs[b.Lib], b)
+}
+
 // save marshals .Books then writes to .Name + ".json"
 func (c *Catalogue) save() error {
 	data, err := json.MarshalIndent(c.Books, "", "	")
@@ -37,16 +45,17 @@ func (c *Catalogue) save() error {
 	return ioutil.WriteFile(filename, data, 0600)
 }
 
-func makeCatalogue(name string, books []*Book) *Catalogue {
-	titles := make(map[string][]*Book)
-	isbns := make(map[string][]*Book)
-	libs := make(map[string][]*Book)
-	for _, b := range books {
-		titles[b.Title] = append(titles[b.Title], b)
-		isbns[b.ISBN] = append(isbns[b.ISBN], b)
-		libs[b.Lib] = append(libs[b.Lib], b)
+func intrCatalogue(name string, books []*Book) *Catalogue {
+	c := &Catalogue{
+		Name: name,
+		Titles: make(map[string][]*Book),
+		ISBNs: make(map[string][]*Book),
+		Libs: make(map[string][]*Book),
 	}
-	return &Catalogue{Name: name, Count: len(books), Books: books, Titles: titles, ISBNs: isbns, Libs: libs}
+	for _, b := range books {
+		c.intrBook(b)
+	}
+	return c
 }
 
 // loadCatalogue unmarshals data read from name.json into a Catalogue
@@ -61,7 +70,7 @@ func loadCatalogue(name string) (*Catalogue, error) {
 		return nil, fmt.Errorf("JSON unmarshling failed: %s", err)
 	}
 
-	return makeCatalogue(name, books), nil
+	return intrCatalogue(name, books), nil
 }
 
 // templates cache
@@ -96,7 +105,7 @@ func renderCatalogueTemplate(w http.ResponseWriter, tmpl string, c *Catalogue) {
 func viewCatalogueHandler(w http.ResponseWriter, r *http.Request, name string) {
 	c, err := loadCatalogue(name)
 	if err != nil {
-		http.NotFound(w, r) // place holder: redirect to "makeCatalogue"?
+		http.NotFound(w, r) // place holder: redirect to "intrCatalogue"?
 		return
 	}
 	renderCatalogueTemplate(w, "viewCatalogue", c)
@@ -122,17 +131,18 @@ func findHandler(w http.ResponseWriter, r *http.Request) {
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	isbn := r.FormValue("isbn")
-	c := &UniCat // placeholder
+	c := UniCat // placeholder
 	if title != "" {
-		c = makeCatalogue("Results", c.Titles[title])
+		c = intrCatalogue("Results", c.Titles[title])
 	}
 	if isbn != "" {
-		c = makeCatalogue("Results", c.ISBNs[isbn])
+		c = intrCatalogue("Results", c.ISBNs[isbn])
 	}
 	renderCatalogueTemplate(w, "viewCatalogue", c)
 }
 
-var validPath = regexp.MustCompile("^/view?.*$") // placeholder
+var rePath = "^/(view|find|search).*$" //placeholder
+var validPath = regexp.MustCompile(rePath)
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -145,14 +155,16 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 	}
 }
 
-var UniCat Catalogue
+var UniCat *Catalogue
 
 func main() {
 	b0 := Book{Title: "Authority and the Individual", ISBN: "9781134812271", Lib: "Pembrook Public Library"}
 	b1 := Book{Title: "The Principles of Mathematics", ISBN: "9780203864760", Lib: "Pembrook Public Library"}
 	books := []*Book{&b0, &b1}
-	UniCat = *makeCatalogue("UniCat", books)
+	UniCat = intrCatalogue("UniCat", books)
+	UniCat.intrBook(&Book{Title: "The Conquest of Happiness", ISBN: "9780871401625", Lib: "Pembrook Public Library"})
 	UniCat.save()
+
 	http.HandleFunc("/view", makeHandler(viewHandler))
 	http.HandleFunc("/find", findHandler)
 	http.HandleFunc("/search", searchHandler)
