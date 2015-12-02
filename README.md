@@ -61,6 +61,9 @@ Go back to http://localhost:8080/find and in the ISBN text input put "9780203864
 - - -
 
 To Do:
+* Introduce UIN for books
+* Catalogue.Books as map[string]*Book row with UIN key
+* Remaining attributes as column maps (they already are, but make that obvious)
 * Introduce edit book
 * Introduce request book
 * Introduce "make" book
