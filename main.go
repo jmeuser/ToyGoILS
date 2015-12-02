@@ -47,10 +47,10 @@ func (c *Catalogue) save() error {
 
 func intrCatalogue(name string, books []*Book) *Catalogue {
 	c := &Catalogue{
-		Name: name,
+		Name:   name,
 		Titles: make(map[string][]*Book),
-		ISBNs: make(map[string][]*Book),
-		Libs: make(map[string][]*Book),
+		ISBNs:  make(map[string][]*Book),
+		Libs:   make(map[string][]*Book),
 	}
 	for _, b := range books {
 		c.intrBook(b)
