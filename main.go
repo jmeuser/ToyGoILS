@@ -83,9 +83,6 @@ func renderBookTemplate(w http.ResponseWriter, tmpl string, b *Book) {
 	}
 }
 
-func viewBookHandler(w http.ResponseWriter, r *http.Request, b *Book) {
-	renderBookTemplate(w, "viewBook", b) // place holder
-}
 
 func editBookHandler(fn func(http.ResponseWriter, *http.Request, *Book)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
